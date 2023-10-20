@@ -1,12 +1,12 @@
 import Note from "./Note";
 
 function NoteRow({active}) {
-  const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+  const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'].reverse();
 
   return (
     <div className={`noterow ${active ? 'noterow--active' : ''}`}>
       {notes.map((n, i) => {
-        return <Note note={n} key={`note-${i}`}/>
+        return <Note playing={active} note={n} key={`note-${i}`}/>
       })}
     </div>
   )

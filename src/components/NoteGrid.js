@@ -21,7 +21,9 @@ function NoteGrid() {
     { active: false },
     { active: false },
     { active: false }
-  ])
+  ]);
+  const [playLoop, setPlayLoop] = useState(null);
+  const [clearing, setClearing] = useState(false);
 
   const play = () => {
     const bpm = 120;
@@ -37,12 +39,25 @@ function NoteGrid() {
       })
       setNoteRows(cloneNoteRows);
       activeIndex++
-    }, 500);
+    }, 300);
+
+    setPlayLoop(loop);
   }
 
-  useEffect(() => {
-    play();
-  }, [])
+  const stop = () => {
+    clearInterval(playLoop);
+    const cloneNoteRows = [...noteRows];
+    cloneNoteRows.forEach((row, i) => {
+      row.active = false;
+    })
+    setNoteRows(cloneNoteRows);
+  }
+
+  const clear = () => {
+    [...document.querySelectorAll('.note--active')].forEach((note) => {
+      note.click();
+    })
+  }
 
   return (
     <>
@@ -52,6 +67,11 @@ function NoteGrid() {
             <NoteRow {...row} key={`noterow-${i}`} />
           )
         })}
+      </div>
+      <div className="controls">
+        <button onClick={play}>Play</button>
+        <button onClick={stop}>Stop</button>
+        <button onClick={clear}>Clear</button>
       </div>
     </>
   )
