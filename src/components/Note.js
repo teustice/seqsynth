@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-function Note({ note, playing }) {
+function Note({ audioCTX, note, playing }) {
   const [makingNoise, setMakingNoise] = useState(false);
   const [active, setActive] = useState(false);
-  const [ctx, setCtx] = useState(false);
   const [gainNode, setGainNode] = useState(false);
   const [oscillator, setOscillator] = useState(false);
 
@@ -22,7 +21,9 @@ function Note({ note, playing }) {
   }
 
   useEffect(() => {
-    const audioCTX = new (window.AudioContext || window.webkitAudioContext)()
+    if(!audioCTX) return;
+    console.log('here');
+
     const gainNode = audioCTX.createGain()
     gainNode.gain.value = .1
     gainNode.connect(audioCTX.destination)
@@ -33,29 +34,31 @@ function Note({ note, playing }) {
     oscillator.start();
     setOscillator(oscillator);
     setGainNode(gainNode);
-    setCtx(audioCTX);
-  }, [])
+  }, [audioCTX])
 
   useEffect(() => {
+    if(!audioCTX) return;
+
     if (active && playing) {
       if (oscillator) {
-        ctx.resume();
+        audioCTX.resume();
+        console.log(oscillator);
         oscillator.connect(gainNode)
-        gainNode.gain.setTargetAtTime(.1, ctx.currentTime, 0.015);
+        gainNode.gain.setTargetAtTime(.1, audioCTX.currentTime, 0.015);
         setMakingNoise(true);
       }
     } else {
       if (oscillator && makingNoise) {
         //prevent click
         console.log('stopping');
-        gainNode.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.015);
+        gainNode.gain.setTargetAtTime(0.0001, audioCTX.currentTime, 0.015);
         setTimeout(() => {
           oscillator.disconnect(gainNode)
           setMakingNoise(false);
         }, 50);
       }
     }
-  }, [playing])
+  }, [playing, audioCTX])
 
   return (
     <div className={`note ${active ? 'note--active' : ''}`} onClick={() => setActive(!active)}>
