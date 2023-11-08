@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-function Note({ audioCTX, note, playing }) {
+function Note({ audioCTX, note, playing, waveshape }) {
   const [makingNoise, setMakingNoise] = useState(false);
   const [active, setActive] = useState(false);
   const [gainNode, setGainNode] = useState(false);
@@ -22,19 +22,24 @@ function Note({ audioCTX, note, playing }) {
 
   useEffect(() => {
     if(!audioCTX) return;
-    console.log('here');
 
     const gainNode = audioCTX.createGain()
     gainNode.gain.value = .1
     gainNode.connect(audioCTX.destination)
 
     const oscillator = audioCTX.createOscillator()
-    oscillator.type = 'sine'
-    oscillator.frequency.value = TONEREF[note][4];
+    oscillator.type = waveshape;
+    oscillator.frequency.value = note;
     oscillator.start();
     setOscillator(oscillator);
     setGainNode(gainNode);
   }, [audioCTX])
+
+  useEffect(() => {
+    if(oscillator) {
+      oscillator.type = waveshape;
+    }
+  }, [waveshape])
 
   useEffect(() => {
     if(!audioCTX) return;

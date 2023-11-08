@@ -22,18 +22,32 @@ function NoteGrid() {
     { active: false },
     { active: false }
   ]);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [playLoop, setPlayLoop] = useState(null);
   const [clearing, setClearing] = useState(false);
   const [tempo, setTempo] = useState('120');
   const [audioCTX, setAudioCTX] = useState(null);
+  const [waveshape, setWaveshape] = useState('sine');
+
   useEffect(() => {
     const ctx = new (window.AudioContext || window.webkitAudioContext)()
     setAudioCTX(ctx)
   }, [])
-  const play = () => {
-    const beatsPerMilli = (((60 / tempo)) * 1000);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      stop();
+      return;
+    };
     let activeIndex = 0;
-    const loop = setInterval(() => {
+    if (playLoop) {
+      clearTimeout(playLoop);
+      activeIndex = 0;
+    }
+    const beatsPerMilli = (60000 / tempo) / 4; //get 16th notes
+    console.log(beatsPerMilli);
+
+    const activateRow = () => {
       if (activeIndex === noteRows.length) {
         activeIndex = 0;
       }
@@ -43,13 +57,22 @@ function NoteGrid() {
       })
       setNoteRows(cloneNoteRows);
       activeIndex++
-    }, beatsPerMilli);
 
-    setPlayLoop(loop);
-  }
+      const playloop = setTimeout(() => {
+        activateRow();
+      }, beatsPerMilli)
+
+      setPlayLoop(playloop);
+    }
+
+    activateRow();
+
+    // setPlayLoop(loop);
+  }, [isPlaying, tempo])
 
   const stop = () => {
-    clearInterval(playLoop);
+    setIsPlaying(false);
+    clearTimeout(playLoop);
     const cloneNoteRows = [...noteRows];
     cloneNoteRows.forEach((row, i) => {
       row.active = false;
@@ -77,17 +100,20 @@ function NoteGrid() {
     <>
       <div className="controls-left">
         <div className="control-group">
-          <label htmlFor="tempo">BPM: <b>{tempo}</b></label>
+          <label htmlFor="tempo"><b>BPM:</b> {tempo}</label>
           <input
             type="range"
             min="1"
-            max="500"
+            max="300"
             className="slider"
             value={tempo}
-            onChange={(e) => setTempo(e.currentTarget.value)} />
+            onChange={(e) => {
+              setTempo(e.currentTarget.value);
+              stop();
+            }} />
         </div>
         <div className="control-group">
-          <label htmlFor="tempo">Grid Size: <b>{noteRows.length}</b></label>
+          <label htmlFor="tempo"><b>Grid Size:</b> {noteRows.length}</label>
           <input
             type="range"
             min="8"
@@ -96,17 +122,39 @@ function NoteGrid() {
             value={noteRows.length}
             onChange={(e) => updateGrid(e.currentTarget.value)} />
         </div>
+        <div className="control-group">
+          <strong>Shape</strong>
+          <div className="radio-list">
+            {['sine', 'square', 'triangle', 'sawtooth'].map((shape, i) => {
+              return (
+                <div className="radio-group" key={`shape-${i}`}>
+                  <div
+                    className={`toggle ${waveshape === shape ? 'active' : ''}`}
+                    onClick={() => setWaveshape(shape)}
+                  >
+                    <img src={process.env.PUBLIC_URL + `/${shape}.png`} alt="waveform" />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
       <div className="notegrid-wrapper">
         <div className="notegrid">
           {noteRows.map((row, i) => {
             return (
-              <NoteRow {...row} index={i} key={`noterow-${i}`} audioCTX={audioCTX} />
+              <NoteRow {...row}
+                index={i}
+                key={`noterow-${i}`}
+                audioCTX={audioCTX}
+                waveshape={waveshape}
+              />
             )
           })}
         </div>
         <div className="controls">
-          <button onClick={play}>Play</button>
+          <button onClick={() => setIsPlaying(true)}>Play</button>
           <button onClick={stop}>Stop</button>
           <button onClick={clear}>Clear</button>
         </div>

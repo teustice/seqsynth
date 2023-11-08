@@ -58,3 +58,43 @@
   background: aquamarine;
   cursor: pointer;
 }
+
+.controls-left, .controls-right {
+  padding: 16px;
+}
+
+.control-group {
+  margin-top: 16px;
+}
+
+.radio-list {
+  display: flex;
+  margin-top: 6px;
+}
+
+.toggle {
+  text-transform: capitalize;
+  margin: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.toggle:hover {
+  cursor: pointer;
+}
+
+.toggle.active {
+  background: #ffb8e2;
+  border-color: #ffb8e2;
+}
+
+.toggle img {
+  flex: 1;
+  width: 50px;
+  height: 50px;
+  mix-blend-mode: lighten;
+  display: block;
+  border-radius: 8px;
+}
